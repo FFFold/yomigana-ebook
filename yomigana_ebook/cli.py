@@ -11,16 +11,17 @@ def main():
         description="The fastest converter to add yomigana(readings) to Japanese epub eBooks! (Using Mecab and Unidic)"
     )
     parser.add_argument("ebook_paths", type=str, nargs="*")
+    parser.add_argument("-f", "--filter", action="store_true", help="Filter non-Japanese paragraphs")
     args = parser.parse_args()
 
     if args.ebook_paths:
-        process_ebooks(args.ebook_paths)
+        process_ebooks(args.ebook_paths, args.filter)
         exit(0)
 
     parser.print_help()
 
 
-def process_ebooks(arg_paths: List[str]):
+def process_ebooks(arg_paths: List[str], filter_non_japanese: bool = False):
     for arg_path in arg_paths:
         file_path = path.abspath(arg_path)
         file_dir = path.dirname(file_path)
@@ -31,8 +32,10 @@ def process_ebooks(arg_paths: List[str]):
             start_time = time()
             print()
             print(f"[start] parsing the ebook: {file_path}")
+            if filter_non_japanese:
+                print("[info]  filtering non-Japanese paragraphs")
 
-            process_ebook(f_reader, f_writer)
+            process_ebook(f_reader, f_writer, filter_non_japanese)
 
             end_time = time() - start_time
             print(f"[done]  here's the parsed ebook: {output_path}")
