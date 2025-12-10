@@ -18,11 +18,17 @@ def is_latin_only(text: str) -> bool:
 
 
 def is_hira(char: str) -> bool:
-    return "HIRAGANA" in get_unicode_name(char)
+    try:
+        return "HIRAGANA" in get_unicode_name(char)
+    except ValueError:
+        return False
 
 
 def is_kata(char: str) -> bool:
-    return "KATAKANA" in get_unicode_name(char)
+    try:
+        return "KATAKANA" in get_unicode_name(char)
+    except ValueError:
+        return False
 
 
 def is_kanji(char: str) -> bool:
@@ -39,3 +45,7 @@ def is_kanji(char: str) -> bool:
 
 def is_latin(char: str) -> bool:
     return "LATIN" in get_unicode_name(char)
+
+
+def contains_japanese(text: str) -> bool:
+    return any((is_hira(char) or is_kata(char)) for char in text)

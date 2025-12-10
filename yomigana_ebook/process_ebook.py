@@ -3,8 +3,10 @@ from typing import IO
 from zipfile import ZipFile, ZIP_DEFLATED
 from concurrent.futures import Future, ProcessPoolExecutor, as_completed
 
-from bs4 import BeautifulSoup, NavigableString, Tag, XMLParsedAsHTMLWarning
+from bs4 import BeautifulSoup, Tag, XMLParsedAsHTMLWarning
+from bs4.element import NavigableString
 from yomigana_ebook.yomituki import yomituki
+from yomigana_ebook.checking import contains_japanese
 
 
 filterwarnings("ignore", category=XMLParsedAsHTMLWarning, module="bs4")
@@ -47,8 +49,10 @@ def process_tag(tag: Tag):
     if tag.name == "ruby":
         return
 
-    if type(tag) is NavigableString:
-        tag.replace_with("".join(yomituki(tag)))
+    if isinstance(tag, NavigableString):
+        text = str(tag)
+        if contains_japanese(text):
+            tag.replace_with("".join(yomituki(text)))
         return
 
     if hasattr(tag, "children"):
