@@ -3,6 +3,7 @@ import "./style.css";
 const loader = <HTMLDivElement>document.querySelector(".loader");
 const dropContainer = <HTMLLabelElement>document.querySelector(".drop-container");
 const fileInput = <HTMLInputElement>document.querySelector(".input-file");
+const filterCheckbox = <HTMLInputElement>document.querySelector(".filter-checkbox");
 const submitBtn = <HTMLButtonElement>document.querySelector(".btn-submit");
 
 submitBtn.addEventListener("click", async _event => {
@@ -13,6 +14,7 @@ submitBtn.addEventListener("click", async _event => {
     for (const file of files!) {
         const formData = new FormData();
         formData.append("ebook", file);
+        formData.append("filter", filterCheckbox.checked ? "true" : "false");
 
         const response = await fetch("/api/process-ebook", { method: "POST", body: formData });
         const blobUrl = URL.createObjectURL(await response.blob());

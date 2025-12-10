@@ -180,6 +180,25 @@ input[type=file]::file-selector-button:hover {
     border-color: #747bff;
 }
 
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    color: #bbbbbb;
+}
+
+.filter-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.filter-option label {
+    cursor: pointer;
+    user-select: none;
+}
+
 .donate {
     margin-bottom: 10px;
 }
