@@ -1,4 +1,26 @@
 from unicodedata import name as get_unicode_name
+import subprocess
+import sys
+
+
+def check_unidic_dictionary() -> bool:
+    """检查unidic词典是否已安装"""
+    try:
+        import unidic
+        from pathlib import Path
+        
+        dic_dir = Path(unidic.DICDIR)
+        return dic_dir.exists() and len(list(dic_dir.glob("*"))) > 0
+    except Exception:
+        return False
+
+
+def download_unidic_dictionary() -> None:
+    """下载unidic词典"""
+    try:
+        subprocess.check_call([sys.executable, "-m", "unidic", "download"])
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"词典下载失败: {e}")
 
 
 def is_unknown(surface: str, reading: str) -> bool:
