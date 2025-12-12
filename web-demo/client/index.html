@@ -13,24 +13,24 @@
 
 <body>
     <div id="app">
-        <div class="description">Add yomigana to your Japanese eBooks!</div>
+        <div class="description">向您的日文电子书添加假名注音</div>
 
         <div class="loader">
-            <span>The server is processing the eBook, this process will take a few seconds</span>
+            <span>服务器正在处理您的电子书</span>
             <span class="dot dot-1">．</span>
             <span class="dot dot-2">．</span>
             <span class="dot dot-3">．</span>
         </div>
 
         <div class="drop-container">
-            <span class="drop-title">Drop files here</span>
+            <span class="drop-title">拖动EPUB文件到这里</span>
             <span>or</span>
             <input type="file" class="input-file" required>
             <div class="filter-option">
                 <input type="checkbox" id="filter-checkbox" class="filter-checkbox">
-                <label for="filter-checkbox">Filter non-Japanese paragraphs</label>
+                <label for="filter-checkbox">过滤非日文段落（适用于中日混排电子书）</label>
             </div>
-            <button class="btn-submit">parse</button>
+            <button class="btn-submit">执行</button>
         </div>
 
 
