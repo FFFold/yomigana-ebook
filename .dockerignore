@@ -14,3 +14,6 @@ tests/
 .pytest_cache/
 
 *.epub
+
+IFLOW.md
+.IFLOW/
