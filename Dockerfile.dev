@@ -6,10 +6,8 @@ WORKDIR /workspace/yomigana-ebook
 # tell git the project directory is safe
 RUN git config --global --add safe.directory /workspace/yomigana-ebook
 
-# install poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
-ENV PATH="/root/.local/bin:$PATH"
-RUN poetry self update
+# install uv
+COPY --from=ghcr.io/astral-sh/uv:0.6.0 /uv /usr/local/bin/uv
 
 # install node.js for client development
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && apt-get install -y nodejs

@@ -36,14 +36,14 @@ $ yomigana_ebook -f [epub文件...]
 $ git clone https://github.com/FFFold/yomigana-ebook.git
 $ cd yomigana-ebook
 
-# 安装依赖（使用 Poetry）
-$ poetry install
+# 安装依赖（使用 uv）
+$ uv sync
 
 # 下载 UniDic 词典（必须）
-$ python -m unidic download
+$ uv run python -m unidic download
 
 # 运行
-$ poetry run yomigana_ebook [epub文件...]
+$ uv run yomigana_ebook [epub文件...]
 ```
 
 ### Windows 用户

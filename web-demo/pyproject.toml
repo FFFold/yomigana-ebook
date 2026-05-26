@@ -1,21 +1,23 @@
-[tool.poetry]
+[project]
 name = "web-demo"
 version = "0.1.0"
 description = "The web demo for yomigana_ebook package"
-authors = ["Yu Chen <rabbit19981023@gmail.com>"]
 readme = "README.md"
+authors = [{ name = "Yu Chen", email = "rabbit19981023@gmail.com" }]
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "yomigana-ebook",
+    "fastapi>=0.95.2,<1.0.0",
+    "uvicorn[standard]>=0.22.0,<1.0.0",
+    "python-multipart>=0.0.6",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
+[tool.uv.sources]
+yomigana-ebook = { workspace = true }
 
-yomigana-ebook = {path = ".."}
-fastapi = "^0.95.2"
-uvicorn = {extras = ["standard"], version = "^0.22.0"}
-python-multipart = "^0.0.6"
-
-[tool.poetry.group.dev.dependencies]
-black = "^23.3.0"
+[dependency-groups]
+dev = ["black>=23.3.0"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
