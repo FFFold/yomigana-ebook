@@ -1,33 +1,33 @@
-[tool.poetry]
+[project]
 name = "yomigana-ebook"
 version = "0.2.3"
-keywords = ["japanese", "lightnovel", "ebook", "epub", "furigana", "yomigana", "kanji", "mecab", "unidic", "nlp"]
 description = "The fastest converter to add yomigana(readings) to Japanese epub eBooks! (Using Mecab and Unidic)"
-license = "MIT"
-authors = ["Yu Chen <rabbit19981023@gmail.com>"]
 readme = "README.md"
-homepage = "https://github.com/rabbit19981023/yomigana-ebook"
-repository = "https://github.com/rabbit19981023/yomigana-ebook"
+license = "MIT"
+authors = [{ name = "Yu Chen", email = "rabbit19981023@gmail.com" }]
+keywords = ["japanese", "lightnovel", "ebook", "epub", "furigana", "yomigana", "kanji", "mecab", "unidic", "nlp"]
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "fugashi>=1.2.1,<2.0.0",
+    "unidic>=1.1.0,<2.0.0",
+    "beautifulsoup4>=4.12.2,<5.0.0",
+    "lxml>=4.9.2,<5.0.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
+[project.urls]
+Homepage = "https://github.com/rabbit19981023/yomigana-ebook"
+Repository = "https://github.com/rabbit19981023/yomigana-ebook"
 
-fugashi = "^1.2.1"
-unidic = "^1.1.0"
-beautifulsoup4 = "^4.12.2"
-lxml = "^4.9.2"
-
-[tool.poetry.group.dev.dependencies]
-black = "^23.3.0"
-
-[tool.poetry.group.test.dependencies]
-pytest = "^7.3.1"
-pytest-watcher = "^0.2.6"
-pytest-testmon = "^2.0.6"
-
-[tool.poetry.scripts]
+[project.scripts]
 yomigana_ebook = "yomigana_ebook.cli:main"
 
+[dependency-groups]
+dev = ["black>=23.3.0"]
+test = ["pytest>=7.3.1", "pytest-watcher>=0.2.6", "pytest-testmon>=2.0.6"]
+
+[tool.uv.workspace]
+members = ["web-demo"]
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
