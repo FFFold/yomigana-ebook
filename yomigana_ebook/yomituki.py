@@ -1,5 +1,6 @@
 from typing import Tuple, Generator
 from os.path import commonprefix
+from functools import lru_cache
 
 from fugashi import Tagger  # type: ignore
 from yomigana_ebook.converter import kata2hira
@@ -10,6 +11,7 @@ from yomigana_ebook.checking import (
     is_latin_only,
     is_hira,
     is_kanji,
+    contains_japanese_script,
 )
 
 
@@ -17,6 +19,10 @@ tagger = Tagger()  # type: ignore
 
 
 def yomituki(sentence: str) -> Generator[str, None, None]:
+    if not contains_japanese_script(sentence):
+        yield sentence
+        return
+
     # split sentence by whitespaces
     sub_sentences = sentence.split(" ")
 
@@ -35,7 +41,8 @@ def yomituki_text(text: str) -> Generator[str, None, None]:
         yield yomituki_word(morpheme.surface, morpheme.feature.kana)  # type: ignore
 
 
-def yomituki_word(surface: str, kata: str) -> str:
+@lru_cache(maxsize=65536)
+def yomituki_word(surface: str, kata: str | None) -> str:
     if is_unknown(surface, kata):
         return surface
 

@@ -2,6 +2,7 @@ import pytest
 
 from yomigana_ebook.constants import ALL_HIRA, ALL_KATA
 from yomigana_ebook.yomituki import yomituki, yomituki_word
+from yomigana_ebook.checking import contains_japanese_script
 
 
 @pytest.mark.parametrize(
@@ -91,3 +92,21 @@ ANYTHING_UNKNOWN = "anything whose reading is unknown"
 )
 def test_yomituki_word(test_case: str, surface: str, kata: str, expected: str):
     assert yomituki_word(surface, kata) == expected
+
+
+@pytest.mark.parametrize(
+    "test_case, text, expected_has_script",
+    [
+        ("pure english", "Hello World", False),
+        ("pure numbers", "12345", False),
+        ("symbols", "!?...", False),
+        ("hiragana", "こんにちは", True),
+        ("katakana", "カタカナ", True),
+        ("kanji only", "漢字", True),
+        ("mixed english and hiragana", "Helloこんにちは", True),
+        ("mixed english and kanji", "Hello漢字", True),
+        ("iteration mark 々", "々", True),
+    ],
+)
+def test_contains_japanese_script(test_case: str, text: str, expected_has_script: bool):
+    assert contains_japanese_script(text) == expected_has_script
