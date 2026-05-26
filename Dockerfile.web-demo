@@ -37,9 +37,10 @@ WORKDIR /app
 COPY --from=build-client /build/dist ./client/dist
 
 COPY --from=build-webapp /build/.venv /app/.venv
+COPY --from=build-webapp /build/yomigana_ebook ./yomigana_ebook
 COPY --from=build-webapp /build/web-demo/pyproject.toml /build/web-demo/README.md ./
 COPY --from=build-webapp /build/web-demo/web_demo ./web_demo
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-ENTRYPOINT ["uvicorn", "web_demo.main:app"]
+ENTRYPOINT ["python", "-m", "uvicorn", "web_demo.main:app"]
