@@ -1,0 +1,84 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - "yomigana_ebook/**"
+      - "web-demo/**"
+      - "Dockerfile.web-demo"
+      - "pyproject.toml"
+      - "web-demo/pyproject.toml"
+      - "uv.lock"
+  workflow_dispatch:
+
+concurrency:
+  group: docker-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image names
+        id: vars
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "ghcr=ghcr.io/$OWNER/yomigana-ebook-web-demo" >> $GITHUB_OUTPUT
+          echo "dh=$OWNER/yomigana-ebook-web-demo" >> $GITHUB_OUTPUT
+
+      - name: Check Docker Hub credentials
+        id: check_dh
+        env:
+          DH_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: |
+          if [ -n "$DH_USER" ]; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        if: steps.check_dh.outputs.available == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push to GHCR
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.web-demo
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.ghcr }}:latest
+            ${{ steps.vars.outputs.ghcr }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push to Docker Hub
+        if: steps.check_dh.outputs.available == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.web-demo
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.dh }}:latest
+            ${{ steps.vars.outputs.dh }}:${{ github.sha }}
+          cache-from: type=gha
