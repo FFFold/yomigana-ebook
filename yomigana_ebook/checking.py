@@ -49,3 +49,20 @@ def is_latin(char: str) -> bool:
 
 def contains_japanese(text: str) -> bool:
     return any((is_hira(char) or is_kata(char)) for char in text)
+
+
+def contains_japanese_script(text: str) -> bool:
+    # Uses Unicode range checks instead of is_hira/is_kata/is_kanji for performance.
+    # Those functions call unicodedata.name() per character; this fast-path avoids that
+    # overhead by using direct range comparisons, accepting a slightly different
+    # definition of "Japanese script" (e.g. CJK extension blocks are not covered).
+    for char in text:
+        if "\u3040" <= char <= "\u309f":
+            return True
+        if "\u30a0" <= char <= "\u30ff":
+            return True
+        if "\u4e00" <= char <= "\u9fff":
+            return True
+        if char == "\u3005":
+            return True
+    return False
