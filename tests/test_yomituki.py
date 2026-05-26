@@ -3,6 +3,7 @@ import pytest
 from yomigana_ebook.constants import ALL_HIRA, ALL_KATA
 from yomigana_ebook.yomituki import yomituki, yomituki_word
 from yomigana_ebook.checking import contains_japanese_script
+from yomigana_ebook.process_ebook import process_html
 
 
 @pytest.mark.parametrize(
@@ -110,3 +111,37 @@ def test_yomituki_word(test_case: str, surface: str, kata: str, expected: str):
 )
 def test_contains_japanese_script(test_case: str, text: str, expected_has_script: bool):
     assert contains_japanese_script(text) == expected_has_script
+
+
+@pytest.mark.parametrize(
+    "test_case, sentence",
+    [
+        ("pure ascii", "Hello World"),
+        ("pure digits", "12345"),
+        ("punctuation only", "!?...—"),
+        ("empty string", ""),
+    ],
+)
+def test_yomituki_fast_path_non_japanese(test_case: str, sentence: str):
+    assert "".join(yomituki(sentence)) == sentence
+
+
+def test_process_html_preserves_existing_ruby():
+    html = "<html><body><p><ruby>漢<rt>かん</rt></ruby></p></body></html>".encode()
+    _, result = process_html("test.xhtml", html)
+    assert result.count(b"<ruby>") == 1
+
+
+def test_process_html_skips_script_and_style():
+    script_content = 'var x = "漢字";'
+    style_content = ".klass { color: red; }"
+    html = f"<html><head><style>{style_content}</style><script>{script_content}</script></head><body><p>本文</p></body></html>".encode()
+    _, result = process_html("test.xhtml", html)
+    assert style_content.encode() in result
+    assert script_content.encode() in result
+
+
+def test_process_html_skips_whitespace_only_nodes():
+    html = "<html><body><p>  \n \t  </p></body></html>".encode()
+    _, result = process_html("test.xhtml", html)
+    assert b"<ruby>" not in result

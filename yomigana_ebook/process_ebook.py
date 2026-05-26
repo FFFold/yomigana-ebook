@@ -56,15 +56,15 @@ def process_html(file: str, content: bytes, filter_non_japanese: bool = False):
 
 
 def process_tag(tag: Tag, filter_non_japanese: bool = False):
-    if tag.name in SKIP_TAGS:
-        return
-
     if isinstance(tag, NavigableString):
         text = str(tag)
         if not text.strip():
             return
         if not filter_non_japanese or contains_japanese(text):
             tag.replace_with("".join(yomituki(text)))
+        return
+
+    if tag.name in SKIP_TAGS:
         return
 
     if hasattr(tag, "children"):
