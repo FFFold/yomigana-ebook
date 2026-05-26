@@ -15,8 +15,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/rabbit19981023/yomigana-ebook"
-Repository = "https://github.com/rabbit19981023/yomigana-ebook"
+Homepage = "https://github.com/FFFold/yomigana-ebook"
+Repository = "https://github.com/FFFold/yomigana-ebook"
 
 [project.scripts]
 yomigana_ebook = "yomigana_ebook.cli:main"

@@ -14,20 +14,14 @@
 
 ## 使用方法
 
-### 从 PyPI 安装
+### 安装 uv
 
 ```bash
-# 安装包
-$ pip install yomigana-ebook
+# macOS / Linux
+$ curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 下载 UniDic 词典（必须）
-$ python -m unidic download
-
-# 为日语电子书添加读音
-$ yomigana_ebook [epub文件...]
-
-# 使用 -f 参数过滤非日语段落
-$ yomigana_ebook -f [epub文件...]
+# Windows
+$ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
 ### 从源码构建
@@ -36,7 +30,7 @@ $ yomigana_ebook -f [epub文件...]
 $ git clone https://github.com/FFFold/yomigana-ebook.git
 $ cd yomigana-ebook
 
-# 安装依赖（使用 uv）
+# 安装依赖（使用 uv，会自动创建 .venv 虚拟环境）
 $ uv sync
 
 # 下载 UniDic 词典（必须）
@@ -44,56 +38,12 @@ $ uv run python -m unidic download
 
 # 运行
 $ uv run yomigana_ebook [epub文件...]
+
+# 使用 -f 参数过滤非日语段落
+$ uv run yomigana_ebook -f [epub文件...]
 ```
 
-### Windows 用户
-
-由于 fugashi 在 Windows 上存在一个已知 bug（详见 [polm/fugashi#42](https://github.com/polm/fugashi/issues/42)），必须在虚拟环境中使用本工具。
-
-#### 从 PyPI 安装
-
-```bash
-# 创建虚拟环境
-$ python -m venv .venv
-
-# 激活虚拟环境
-$ .venv\Scripts\activate
-
-# 安装包
-$ pip install yomigana-ebook
-
-# 下载 UniDic 词典
-$ python -m unidic download
-
-# 为日语电子书添加读音
-$ yomigana_ebook [epub文件...]
-```
-
-#### 从源码构建
-
-```bash
-$ git clone https://github.com/FFFold/yomigana-ebook.git
-$ cd yomigana-ebook
-
-# 创建并激活虚拟环境
-$ python -m venv .venv
-$ .venv\Scripts\activate
-
-# 安装项目
-$ pip install .
-
-# 下载 UniDic 词典
-$ python -m unidic download
-
-# 为日语电子书添加读音
-$ yomigana_ebook [epub文件...]
-```
-
-退出虚拟环境：
-
-```bash
-$ deactivate
-```
+> Windows 用户：fugashi 在 Windows 上存在一个已知 bug（[polm/fugashi#42](https://github.com/polm/fugashi/issues/42)），必须在虚拟环境中使用。`uv sync` 会自动创建虚拟环境，无需额外操作。
 
 ### 通过 Docker 运行 Web Demo
 
