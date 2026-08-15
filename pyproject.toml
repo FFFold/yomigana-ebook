@@ -1,6 +1,6 @@
 [project]
 name = "yomigana-ebook"
-version = "0.2.3"
+version = "0.3.0"
 description = "The fastest converter to add yomigana(readings) to Japanese epub eBooks! (Using Mecab and Unidic)"
 readme = "README.md"
 license = "MIT"

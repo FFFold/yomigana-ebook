@@ -35,7 +35,7 @@ def _project_version() -> str:
     try:
         return metadata.version("yomigana-ebook")
     except Exception:
-        return "0.2.3"
+        return "0.3.0"
 
 
 class DropListWidget(QListWidget):
