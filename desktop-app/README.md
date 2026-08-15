@@ -34,27 +34,33 @@ uv run python -m yomigana_desktop
 
 ## 打包 Windows 可执行文件
 
-项目使用 PyInstaller。由于 UniDic 词典较大，默认使用 `--onedir` 方式，并把词典
-作为 `unidic/dicdir` 数据放入程序目录（不会打进单个 exe）。如果希望产物更小、
-词典完全外置，可以设置环境变量后构建：
+项目使用 PyInstaller。由于 UniDic 词典较大，推荐使用 `--onedir` 方式，并把
+**依赖库**和 **UniDic 词典**分开存放：
 
-```bash
-$env:YOMIGANA_BUNDLE_UNICID = "0"
-uv run --project desktop-app pyinstaller desktop-app/yomigana_desktop.spec
+```text
+dist/yomigana-desktop/
+├── yomigana-desktop.exe   # 主程序
+├── _internal/             # 依赖库（PySide6、fugashi 等）
+└── unidic/dicdir/         # UniDic 词典（外置在 exe 旁边）
 ```
-
-外置词典时，将 `unidic/dicdir` 放到可执行文件旁边，或设置
-`YOMIGANA_UNICID_DIR` 指向词典目录。
 
 在项目根目录执行：
 
-```bash
-uv run --project desktop-app pyinstaller desktop-app/yomigana_desktop.spec
-# 或使用辅助脚本
+```powershell
 powershell -ExecutionPolicy Bypass -File desktop-app/build.ps1
 ```
 
-产物在 `desktop-app/dist/yomigana-desktop/`。
+辅助脚本默认会以“词典外置”方式构建，并自动把 UniDic 词典复制到
+`dist/yomigana-desktop/unidic/dicdir/`。
+
+如果希望把词典也打进 `_internal`（单目录分发），可以设置环境变量后手动构建：
+
+```powershell
+$env:YOMIGANA_BUNDLE_UNICID = "1"
+uv run --project desktop-app pyinstaller desktop-app/yomigana_desktop.spec
+```
+
+产物在 `dist/yomigana-desktop/`。
 
 ## 目录结构
 
