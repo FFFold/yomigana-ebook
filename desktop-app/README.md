@@ -30,7 +30,7 @@ uv run python -m yomigana_desktop
 ```
 
 > 依赖 Python 3.11（与根项目一致）。
-> 如果 UniDic 词典不在默认位置，可通过环境变量 `YOMIGANA_UNICID_DIR` 指定 `dicdir` 目录。
+> 如果 UniDic 词典不在默认位置，可通过环境变量 `YOMIGANA_UNIDIC_DIR` 指定 `dicdir` 目录。
 
 ## 打包 Windows 可执行文件
 
@@ -72,7 +72,7 @@ desktop-app/
 └── yomigana_desktop/
     ├── __init__.py
     ├── app.py            # 入口：词典检查 + QApplication
-    ├── dictionary.py     # UniDic 词典查找与 YOMIGANA_UNICID_DIR 配置
+    ├── dictionary.py     # UniDic 词典查找与 YOMIGANA_UNIDIC_DIR 配置
     ├── main_window.py    # 主窗口 UI
     └── worker.py         # 后台转换线程
 ```

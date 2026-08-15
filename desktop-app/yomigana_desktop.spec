@@ -9,7 +9,7 @@ The output is a folder (onedir) at dist/yomigana-desktop/.
 By default the UniDic dictionary data is included in the bundle. Set
 YOMIGANA_BUNDLE_UNICID=0 to keep it external; the app then looks for
 unidic/dicdir next to the executable (or in _internal/unidic/dicdir), or uses
-the YOMIGANA_UNICID_DIR environment variable.
+the YOMIGANA_UNIDIC_DIR environment variable.
 """
 
 import os
@@ -59,12 +59,14 @@ a = Analysis(
 # PyInstaller tends to include unidic/dicdir automatically because it lives
 # inside the installed unidic package. When the user asks for an external
 # dictionary, strip it from the bundle so the distribution stays small.
+def _is_unidic_data(entry):
+    return any(
+        "unidic/dicdir" in str(value).replace("\\", "/") for value in entry[:2]
+    )
+
+
 if not bundle_unidic:
-    a.datas = [
-        entry
-        for entry in a.datas
-        if not str(entry[0]).replace("\\", "/").startswith("unidic/dicdir")
-    ]
+    a.datas = [entry for entry in a.datas if not _is_unidic_data(entry)]
 
 pyz = PYZ(a.pure)
 

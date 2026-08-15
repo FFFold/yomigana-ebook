@@ -16,10 +16,14 @@ from yomigana_ebook.checking import (
     contains_japanese_script,
 )
 
-if "YOMIGANA_UNICID_DIR" in environ:
+_UNIDIC_DIR_ENV = "YOMIGANA_UNIDIC_DIR"
+_LEGACY_UNIDIC_DIR_ENV = "YOMIGANA_UNICID_DIR"
+
+_dicdir_env = environ.get(_UNIDIC_DIR_ENV) or environ.get(_LEGACY_UNIDIC_DIR_ENV)
+if _dicdir_env:
     # Allow GUI/desktop packaging to point at an external UniDic dictionary
     # without modifying the installed unidic package.
-    unidic.DICDIR = environ["YOMIGANA_UNICID_DIR"]
+    unidic.DICDIR = _dicdir_env
 
 tagger = Tagger()  # type: ignore
 

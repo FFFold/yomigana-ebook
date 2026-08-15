@@ -45,7 +45,7 @@ def main() -> int:
             "请先在项目目录执行以下命令下载词典：\n"
             "  uv run python -m unidic download\n\n"
             "如果使用打包版，请将 unidic/dicdir 目录放在程序旁边，"
-            "或设置 YOMIGANA_UNICID_DIR 环境变量指向词典目录。",
+            "或设置 YOMIGANA_UNIDIC_DIR 环境变量指向词典目录。",
         )
         return 1
 
@@ -57,7 +57,7 @@ def main() -> int:
         app.setWindowIcon(QIcon(str(icon_path)))
 
     # Import after the dictionary is configured so the lazy worker import and
-    # child processes see the correct YOMIGANA_UNICID_DIR.
+    # child processes see the correct YOMIGANA_UNIDIC_DIR.
     from yomigana_desktop.main_window import MainWindow
 
     window = MainWindow()

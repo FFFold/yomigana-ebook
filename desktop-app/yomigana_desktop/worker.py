@@ -42,7 +42,7 @@ class ConvertWorker(QThread):
         self._stop_requested = True
 
     def run(self) -> None:  # noqa: D102
-        # Import lazily so the GUI can set YOMIGANA_UNICID_DIR before the
+        # Import lazily so the GUI can set YOMIGANA_UNIDIC_DIR before the
         # module-level MeCab tagger is created.
         try:
             from yomigana_ebook.process_ebook import process_ebook

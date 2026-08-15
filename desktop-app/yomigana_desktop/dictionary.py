@@ -1,7 +1,7 @@
 """UniDic dictionary discovery helpers for the desktop GUI.
 
 The full UniDic dictionary is large, so the packaged app should be allowed to
-keep it outside the executable. ``YOMIGANA_UNICID_DIR`` is honoured by
+keep it outside the executable. ``YOMIGANA_UNIDIC_DIR`` is honoured by
 ``yomigana_ebook.yomituki``; this module resolves a usable dictionary path and
 sets that environment variable before the worker imports the conversion code.
 """
@@ -12,7 +12,8 @@ import os
 import sys
 from pathlib import Path
 
-DICDIR_ENV_VAR = "YOMIGANA_UNICID_DIR"
+DICDIR_ENV_VAR = "YOMIGANA_UNIDIC_DIR"
+LEGACY_DICDIR_ENV_VAR = "YOMIGANA_UNICID_DIR"
 
 # Files that indicate a real installed UniDic dictionary directory.
 _PRIMARY_DIC_MARKERS = ("sys.dic", "lex.csv")
@@ -47,7 +48,7 @@ def _frozen_candidates() -> list[Path]:
 
 def find_unidic_dir() -> Path | None:
     """Return a valid UniDic dictionary directory, or None."""
-    env_dicdir = os.environ.get(DICDIR_ENV_VAR)
+    env_dicdir = os.environ.get(DICDIR_ENV_VAR) or os.environ.get(LEGACY_DICDIR_ENV_VAR)
     candidates: list[Path | str | None] = [
         env_dicdir.strip() if env_dicdir else None,
     ]
@@ -69,7 +70,7 @@ def find_unidic_dir() -> Path | None:
 
 
 def configure_unidic_dir() -> Path | None:
-    """Find a dictionary and export it via ``YOMIGANA_UNICID_DIR``.
+    """Find a dictionary and export it via ``YOMIGANA_UNIDIC_DIR``.
 
     Returns the resolved dictionary path, or None when no valid dictionary is
     available. The environment variable is only set when a valid path exists.

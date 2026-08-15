@@ -49,7 +49,7 @@ def process_ebook(
             zip_writer.writestr(processed_file, processed_content)
 
             if progress_callback is not None:
-                progress_callback(1, 1)
+                progress_callback(1, len(html_files))
             return
 
         with ProcessPoolExecutor() as executor:
