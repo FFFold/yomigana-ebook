@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl, Signal
@@ -52,8 +53,7 @@ class DropListWidget(QListWidget):
         paths = [
             url.toLocalFile()
             for url in event.mimeData().urls()
-            if url.isLocalFile()
-            and url.toLocalFile().lower().endswith(".epub")
+            if url.isLocalFile() and url.toLocalFile().lower().endswith(".epub")
         ]
         if paths:
             self.files_dropped.emit(paths)
@@ -64,8 +64,7 @@ class DropListWidget(QListWidget):
     @staticmethod
     def _has_epub_urls(urls: list[QUrl]) -> bool:
         return any(
-            url.isLocalFile()
-            and url.toLocalFile().lower().endswith(".epub")
+            url.isLocalFile() and url.toLocalFile().lower().endswith(".epub")
             for url in urls
         )
 
@@ -162,18 +161,18 @@ class MainWindow(QMainWindow):
 
     def _add_paths(self, paths: list[str]) -> None:
         existing = {
-            self.file_list.item(i).data(Qt.ItemDataRole.UserRole)
+            os.path.normcase(self.file_list.item(i).data(Qt.ItemDataRole.UserRole))
             for i in range(self.file_list.count())
         }
         for path in paths:
             normalized = str(Path(path).resolve())
-            if normalized in existing:
+            if os.path.normcase(normalized) in existing:
                 continue
             item = QListWidgetItem(Path(path).name)
             item.setData(Qt.ItemDataRole.UserRole, normalized)
             item.setToolTip(normalized)
             self.file_list.addItem(item)
-            existing.add(normalized)
+            existing.add(os.path.normcase(normalized))
 
     def _choose_files(self) -> None:
         files, _ = QFileDialog.getOpenFileNames(
@@ -200,6 +199,12 @@ class MainWindow(QMainWindow):
             for i in range(self.file_list.count())
         ]
 
+    def _output_path_for(self, input_path: Path, output_dir: Path | None) -> Path:
+        output_name = f"with-yomigana_{input_path.name}"
+        if output_dir is None:
+            return input_path.parent / output_name
+        return output_dir / output_name
+
     def _start_conversion(self) -> None:
         paths = self._collect_paths()
         if not paths:
@@ -208,6 +213,25 @@ class MainWindow(QMainWindow):
 
         output_text = self.output_edit.text().strip()
         output_dir = Path(output_text) if output_text else None
+
+        existing_outputs = [
+            output_path
+            for path in paths
+            if (output_path := self._output_path_for(path, output_dir)) is not None
+            and output_path.exists()
+        ]
+        if existing_outputs:
+            answer = QMessageBox.question(
+                self,
+                "确认覆盖",
+                "以下输出文件已存在，是否覆盖？\n\n"
+                + "\n".join(str(p) for p in existing_outputs[:10])
+                + ("\n..." if len(existing_outputs) > 10 else ""),
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if answer != QMessageBox.StandardButton.Yes:
+                return
 
         self._succeeded_count = 0
         self._failed_count = 0
@@ -248,7 +272,9 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(0)
         self.status_label.setText("正在转换…" if running else "就绪")
 
-    def _on_progress(self, book_index: int, book_count: int, done: int, total: int) -> None:
+    def _on_progress(
+        self, book_index: int, book_count: int, done: int, total: int
+    ) -> None:
         if total <= 0:
             self.progress_bar.setRange(0, 0)
             self.status_label.setText(f"正在处理第 {book_index}/{book_count} 本书…")
@@ -303,5 +329,12 @@ class MainWindow(QMainWindow):
                 event.ignore()
                 return
             self._worker.request_stop()
-            self._worker.wait()
+            if not self._worker.wait(10000):
+                QMessageBox.warning(
+                    self,
+                    "正在停止",
+                    "当前文件仍在处理，已请求停止；请稍后再试退出。",
+                )
+                event.ignore()
+                return
         event.accept()

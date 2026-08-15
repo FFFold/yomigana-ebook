@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from time import time
 
@@ -43,7 +44,12 @@ class ConvertWorker(QThread):
     def run(self) -> None:  # noqa: D102
         # Import lazily so the GUI can set YOMIGANA_UNICID_DIR before the
         # module-level MeCab tagger is created.
-        from yomigana_ebook.process_ebook import process_ebook
+        try:
+            from yomigana_ebook.process_ebook import process_ebook
+        except Exception as exc:  # noqa: BLE001 - report any import failure
+            self.log.emit(f"[error] 无法加载转换模块: {exc}")
+            self.all_done.emit(0, len(self._ebook_paths))
+            return
 
         total = len(self._ebook_paths)
         succeeded = 0
@@ -73,15 +79,23 @@ class ConvertWorker(QThread):
             def on_progress(done: int, html_total: int) -> None:
                 self.progress.emit(index, total, done, html_total)
 
+            temp_path = output_path.with_name(output_path.name + ".tmp")
             try:
-                with input_path.open("rb") as reader, output_path.open("wb") as writer:
+                with input_path.open("rb") as reader, temp_path.open("wb") as writer:
                     process_ebook(
                         reader,
                         writer,
                         self._filter_non_japanese,
                         progress_callback=on_progress,
                     )
-            except Exception as exc:  # noqa: BLE001 - report any conversion failure in GUI
+                os.replace(temp_path, output_path)
+            except (
+                Exception
+            ) as exc:  # noqa: BLE001 - report any conversion failure in GUI
+                try:
+                    temp_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
                 failed += 1
                 elapsed = time() - start_time
                 self.book_failed.emit(str(input_path), str(exc))

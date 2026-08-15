@@ -15,7 +15,8 @@ from pathlib import Path
 DICDIR_ENV_VAR = "YOMIGANA_UNICID_DIR"
 
 # Files that indicate a real installed UniDic dictionary directory.
-_DIC_MARKERS = ("sys.dic", "lex.csv")
+_PRIMARY_DIC_MARKERS = ("sys.dic", "lex.csv")
+_SECONDARY_DIC_MARKERS = ("dicrc", "mecabrc")
 
 
 def is_valid_unidic_dir(path: Path | str | None) -> bool:
@@ -24,7 +25,11 @@ def is_valid_unidic_dir(path: Path | str | None) -> bool:
     dicdir = Path(path)
     if not dicdir.is_dir():
         return False
-    return any((dicdir / marker).is_file() for marker in _DIC_MARKERS)
+    has_primary = any((dicdir / marker).is_file() for marker in _PRIMARY_DIC_MARKERS)
+    has_secondary = any(
+        (dicdir / marker).is_file() for marker in _SECONDARY_DIC_MARKERS
+    )
+    return has_primary and has_secondary
 
 
 def _frozen_candidates() -> list[Path]:

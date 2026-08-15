@@ -5,7 +5,7 @@ Build with (from repo root):
 
     uv run --project desktop-app pyinstaller desktop-app/yomigana_desktop.spec
 
-The output is a folder (onedir) at desktop-app/dist/yomigana-desktop/.
+The output is a folder (onedir) at dist/yomigana-desktop/.
 By default the UniDic dictionary data is included in the bundle. Set
 YOMIGANA_BUNDLE_UNICID=0 to keep it external; the app then looks for
 unidic/dicdir next to the executable (or in _internal/unidic/dicdir), or uses
@@ -20,10 +20,15 @@ from PyInstaller.utils.hooks import collect_dynamic_libs
 
 desktop_root = Path(SPECPATH).resolve()
 dicdir = Path(unidic.DICDIR)
+icon_svg = desktop_root / "assets" / "yomigana.svg"
+icon_ico = desktop_root / "assets" / "yomigana.ico"
 
 # Set YOMIGANA_BUNDLE_UNICID=0 to keep the dictionary outside the bundle.
 bundle_unidic = os.environ.get("YOMIGANA_BUNDLE_UNICID", "1") == "1"
-datas = []
+datas = [
+    (str(icon_svg), "assets"),
+    (str(icon_ico), "assets"),
+]
 if bundle_unidic:
     datas.append((str(dicdir), os.path.join("unidic", "dicdir")))
 binaries = collect_dynamic_libs("fugashi")
@@ -79,6 +84,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=str(icon_ico),
 )
 
 coll = COLLECT(

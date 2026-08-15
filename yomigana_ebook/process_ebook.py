@@ -8,7 +8,6 @@ from bs4.element import NavigableString
 from yomigana_ebook.yomituki import yomituki
 from yomigana_ebook.checking import contains_japanese
 
-
 filterwarnings("ignore", category=XMLParsedAsHTMLWarning, module="bs4")
 
 SKIP_TAGS = {"ruby", "rt", "rp", "script", "style"}
@@ -20,7 +19,10 @@ def process_ebook(
     filter_non_japanese: bool = False,
     progress_callback: Optional[Callable[[int, int], None]] = None,
 ):
-    with ZipFile(reader, "r") as zip_reader, ZipFile(writer, "w", ZIP_DEFLATED) as zip_writer:
+    with (
+        ZipFile(reader, "r") as zip_reader,
+        ZipFile(writer, "w", ZIP_DEFLATED) as zip_writer,
+    ):
         html_files: list[tuple[str, bytes]] = []
 
         for file in zip_reader.namelist():
@@ -41,7 +43,9 @@ def process_ebook(
 
         if len(html_files) == 1:
             file, content = html_files[0]
-            processed_file, processed_content = process_html(file, content, filter_non_japanese)
+            processed_file, processed_content = process_html(
+                file, content, filter_non_japanese
+            )
             zip_writer.writestr(processed_file, processed_content)
 
             if progress_callback is not None:
@@ -88,4 +92,3 @@ def process_tag(tag: Tag, filter_non_japanese: bool = False):
     if hasattr(tag, "children"):
         for child in tag.children:
             process_tag(child, filter_non_japanese)  # type: ignore
-

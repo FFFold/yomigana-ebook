@@ -4,10 +4,30 @@ from __future__ import annotations
 
 import multiprocessing
 import sys
+from pathlib import Path
 
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from yomigana_desktop.dictionary import configure_unidic_dir
+
+
+def _icon_path() -> Path | None:
+    """Return the app icon (ICO preferred, SVG fallback) or None."""
+    if getattr(sys, "frozen", False):
+        base_candidates = [
+            Path(sys._MEIPASS) / "assets",
+            Path(sys.executable).resolve().parent / "assets",
+        ]
+    else:
+        base_candidates = [Path(__file__).resolve().parent.parent / "assets"]
+
+    for base in base_candidates:
+        for name in ("yomigana.ico", "yomigana.svg"):
+            candidate = base / name
+            if candidate.is_file():
+                return candidate
+    return None
 
 
 def main() -> int:
@@ -31,6 +51,10 @@ def main() -> int:
 
     app = QApplication(sys.argv)
     app.setApplicationName("yomigana ebook")
+
+    icon_path = _icon_path()
+    if icon_path is not None:
+        app.setWindowIcon(QIcon(str(icon_path)))
 
     # Import after the dictionary is configured so the lazy worker import and
     # child processes see the correct YOMIGANA_UNICID_DIR.

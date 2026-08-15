@@ -16,7 +16,6 @@ from yomigana_ebook.checking import (
     contains_japanese_script,
 )
 
-
 if "YOMIGANA_UNICID_DIR" in environ:
     # Allow GUI/desktop packaging to point at an external UniDic dictionary
     # without modifying the installed unidic package.
@@ -65,7 +64,7 @@ def yomituki_word(surface: str, kata: str | None) -> str:
     # yomituki for:
     # hira + kanji: うれし涙
     # kanji + hira: 見上げて
-    (prefix, (mid_text, mid_hira), suffix) = cut_by_hira(surface, kata2hira(kata))
+    prefix, (mid_text, mid_hira), suffix = cut_by_hira(surface, kata2hira(kata))
     if is_kanji_only(mid_text):
         return f"{prefix}{ruby_wrap(mid_text, mid_hira)}{suffix}"
 

@@ -11,7 +11,9 @@ def main():
         description="The fastest converter to add yomigana(readings) to Japanese epub eBooks! (Using Mecab and Unidic)"
     )
     parser.add_argument("ebook_paths", type=str, nargs="*")
-    parser.add_argument("-f", "--filter", action="store_true", help="Filter non-Japanese paragraphs")
+    parser.add_argument(
+        "-f", "--filter", action="store_true", help="Filter non-Japanese paragraphs"
+    )
     args = parser.parse_args()
 
     if args.ebook_paths:
