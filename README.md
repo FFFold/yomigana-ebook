@@ -47,7 +47,21 @@ $ uv run yomigana_ebook -f [epub文件...]
 
 ### Windows GUI 桌面应用
 
-项目还包含一个 Windows GUI 桌面应用（PySide6），支持拖拽/选择多个 EPUB、过滤非日语段落、指定输出目录、实时进度与日志。详情见 [`desktop-app/README.md`](desktop-app/README.md)。
+项目还包含一个 Windows GUI 桌面应用（PySide6），支持拖拽/选择多个 EPUB、过滤非日语段落、指定输出目录、实时进度与日志。
+
+运行：
+
+```bash
+uv run --project desktop-app yomigana-desktop
+```
+
+打包：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File desktop-app/build.ps1
+```
+
+详情见 [`desktop-app/README.md`](desktop-app/README.md)。
 
 ### 通过 Docker 运行 Web Demo
 

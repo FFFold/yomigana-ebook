@@ -31,6 +31,7 @@ uv run python -m yomigana_desktop
 
 > 依赖 Python 3.11（与根项目一致）。
 > 如果 UniDic 词典不在默认位置，可通过环境变量 `YOMIGANA_UNIDIC_DIR` 指定 `dicdir` 目录。
+> 旧环境变量 `YOMIGANA_UNICID_DIR` 仍会被兼容读取。
 
 ## 打包 Windows 可执行文件
 
@@ -68,7 +69,12 @@ uv run --project desktop-app pyinstaller desktop-app/yomigana_desktop.spec
 desktop-app/
 ├── pyproject.toml
 ├── README.md
-├── yomigana_desktop.spec
+├── build.ps1               # Windows 打包脚本
+├── generate_icon.py        # 从 SVG 生成多尺寸 ICO
+├── yomigana_desktop.spec   # PyInstaller 配置
+├── assets/
+│   ├── yomigana.svg
+│   └── yomigana.ico
 └── yomigana_desktop/
     ├── __init__.py
     ├── app.py            # 入口：词典检查 + QApplication
