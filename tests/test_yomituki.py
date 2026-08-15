@@ -1,9 +1,12 @@
+from io import BytesIO
+from zipfile import ZipFile
+
 import pytest
 
 from yomigana_ebook.constants import ALL_HIRA, ALL_KATA
 from yomigana_ebook.yomituki import yomituki, yomituki_word
 from yomigana_ebook.checking import contains_japanese_script
-from yomigana_ebook.process_ebook import process_html
+from yomigana_ebook.process_ebook import process_ebook, process_html
 
 
 @pytest.mark.parametrize(
@@ -41,7 +44,12 @@ ANYTHING_UNKNOWN = "anything whose reading is unknown"
         ("all hira", ALL_HIRA, ALL_KATA, ALL_HIRA),
         ("all kata", ALL_KATA, ALL_KATA, ALL_KATA),
         ("all kata contains mark 01", "チュー", "チュウ", "チュー"),
-        ("all kata contains mark 02", "アルフレッド・チャニング", "アルフレッド・チャニング", "アルフレッド・チャニング"),
+        (
+            "all kata contains mark 02",
+            "アルフレッド・チャニング",
+            "アルフレッド・チャニング",
+            "アルフレッド・チャニング",
+        ),
         ("all kanji", "漢字", "カンジ", "<ruby>漢字<rt>かんじ</rt></ruby>"),
         ("all kanji contains `々`", "日々", "ヒビ", "<ruby>日々<rt>ひび</rt></ruby>"),
         ("all latin", "right", "ライト", "right"),
@@ -84,9 +92,24 @@ ANYTHING_UNKNOWN = "anything whose reading is unknown"
             "ヒックリカエッテ",
             "<ruby>引<rt>ひ</rt></ruby>っ<ruby>繰<rt>く</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>って",
         ),
-        ("special: old word 01", "間違へ", "マチガエ", "<ruby>間違へ<rt>まちがえ</rt></ruby>"),
-        ("special: old word 02", "教へる", "オシエル", "<ruby>教へる<rt>おしえる</rt></ruby>"),
-        ("special: old word 03", "思ひ出せ", "オモイダセ", "<ruby>思ひ出せ<rt>おもいだせ</rt></ruby>"),
+        (
+            "special: old word 01",
+            "間違へ",
+            "マチガエ",
+            "<ruby>間違へ<rt>まちがえ</rt></ruby>",
+        ),
+        (
+            "special: old word 02",
+            "教へる",
+            "オシエル",
+            "<ruby>教へる<rt>おしえる</rt></ruby>",
+        ),
+        (
+            "special: old word 03",
+            "思ひ出せ",
+            "オモイダセ",
+            "<ruby>思ひ出せ<rt>おもいだせ</rt></ruby>",
+        ),
         ("special: old word 04", "づゝ", "ヅツ", "づゝ"),
         ("special: old word 05", "かゝはら", "カカワラ", "かゝはら"),
     ],
@@ -145,3 +168,79 @@ def test_process_html_skips_whitespace_only_nodes():
     html = "<html><body><p>  \n \t  </p></body></html>".encode()
     _, result = process_html("test.xhtml", html)
     assert b"<ruby>" not in result
+
+
+def test_process_ebook_reports_progress_single_html_file():
+    reader = BytesIO()
+    with ZipFile(reader, "w") as zip_writer:
+        zip_writer.writestr("page.xhtml", "<html><body><p>漢字</p></body></html>")
+    reader.seek(0)
+
+    writer = BytesIO()
+    progress_calls: list[tuple[int, int]] = []
+    process_ebook(
+        reader,
+        writer,
+        progress_callback=lambda done, total: progress_calls.append((done, total)),
+    )
+
+    assert progress_calls[0] == (0, 1)
+    assert progress_calls[-1] == (1, 1)
+
+
+def test_process_ebook_reports_progress_no_html_files():
+    reader = BytesIO()
+    with ZipFile(reader, "w") as zip_writer:
+        zip_writer.writestr("mimetype", "application/epub+zip")
+    reader.seek(0)
+
+    writer = BytesIO()
+    progress_calls: list[tuple[int, int]] = []
+    process_ebook(
+        reader,
+        writer,
+        progress_callback=lambda done, total: progress_calls.append((done, total)),
+    )
+
+    assert progress_calls == [(0, 0)]
+
+
+def test_process_ebook_reports_progress_multiple_html_files():
+    reader = BytesIO()
+    with ZipFile(reader, "w") as zip_writer:
+        zip_writer.writestr("page1.xhtml", "<html><body><p>漢字一</p></body></html>")
+        zip_writer.writestr("page2.xhtml", "<html><body><p>漢字二</p></body></html>")
+    reader.seek(0)
+
+    writer = BytesIO()
+    progress_calls: list[tuple[int, int]] = []
+    process_ebook(
+        reader,
+        writer,
+        progress_callback=lambda done, total: progress_calls.append((done, total)),
+    )
+
+    assert progress_calls[0] == (0, 2)
+    assert (1, 2) in progress_calls
+    assert progress_calls[-1] == (2, 2)
+
+
+def test_process_ebook_reports_progress_multiple_html_files_with_filter():
+    reader = BytesIO()
+    with ZipFile(reader, "w") as zip_writer:
+        zip_writer.writestr("page1.xhtml", "<html><body><p>漢字一</p></body></html>")
+        zip_writer.writestr("page2.xhtml", "<html><body><p>漢字二</p></body></html>")
+    reader.seek(0)
+
+    writer = BytesIO()
+    progress_calls: list[tuple[int, int]] = []
+    process_ebook(
+        reader,
+        writer,
+        filter_non_japanese=True,
+        progress_callback=lambda done, total: progress_calls.append((done, total)),
+    )
+
+    assert progress_calls[0] == (0, 2)
+    assert (1, 2) in progress_calls
+    assert progress_calls[-1] == (2, 2)

@@ -1,7 +1,9 @@
 from typing import Tuple, Generator
+from os import environ
 from os.path import commonprefix
 from functools import lru_cache
 
+import unidic
 from fugashi import Tagger  # type: ignore
 from yomigana_ebook.converter import kata2hira
 from yomigana_ebook.checking import (
@@ -14,6 +16,14 @@ from yomigana_ebook.checking import (
     contains_japanese_script,
 )
 
+_UNIDIC_DIR_ENV = "YOMIGANA_UNIDIC_DIR"
+_LEGACY_UNIDIC_DIR_ENV = "YOMIGANA_UNICID_DIR"
+
+_dicdir_env = environ.get(_UNIDIC_DIR_ENV) or environ.get(_LEGACY_UNIDIC_DIR_ENV)
+if _dicdir_env:
+    # Allow GUI/desktop packaging to point at an external UniDic dictionary
+    # without modifying the installed unidic package.
+    unidic.DICDIR = _dicdir_env
 
 tagger = Tagger()  # type: ignore
 
@@ -58,7 +68,7 @@ def yomituki_word(surface: str, kata: str | None) -> str:
     # yomituki for:
     # hira + kanji: うれし涙
     # kanji + hira: 見上げて
-    (prefix, (mid_text, mid_hira), suffix) = cut_by_hira(surface, kata2hira(kata))
+    prefix, (mid_text, mid_hira), suffix = cut_by_hira(surface, kata2hira(kata))
     if is_kanji_only(mid_text):
         return f"{prefix}{ruby_wrap(mid_text, mid_hira)}{suffix}"
 

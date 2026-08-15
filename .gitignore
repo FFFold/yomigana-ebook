@@ -1,6 +1,9 @@
 # python virtual environment
 .venv/
 
+# uv cache used in sandboxed environments
+.uv-cache/
+
 # py cache
 __pycache__/
 
@@ -12,6 +15,7 @@ __pycache__/
 
 # builds
 /dist
+/build
 
 # ebooks for testing
 *.epub

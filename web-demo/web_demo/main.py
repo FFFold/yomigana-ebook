@@ -9,7 +9,6 @@ from fastapi.responses import FileResponse, StreamingResponse  # type: ignore
 
 from yomigana_ebook.process_ebook import process_ebook
 
-
 app: FastAPI = FastAPI()
 
 app.mount("/assets", StaticFiles(directory="client/dist/assets"), "assets")
@@ -27,8 +26,7 @@ async def get_favicon() -> FileResponse:
 
 @app.post("/api/process-ebook")
 async def process_ebook_handler(
-    ebook: Annotated[bytes, File()],
-    filter: Annotated[bool, Form()] = False
+    ebook: Annotated[bytes, File()], filter: Annotated[bool, Form()] = False
 ) -> StreamingResponse:
     return StreamingResponse(process_ebook_streamer(ebook, filter))
 
