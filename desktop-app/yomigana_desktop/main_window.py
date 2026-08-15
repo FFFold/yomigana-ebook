@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QPlainTextEdit,
     QProgressBar,
     QPushButton,
+    QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
@@ -147,6 +148,10 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.progress_bar)
 
         self.status_label = QLabel("就绪", central)
+        self.status_label.setWordWrap(True)
+        self.status_label.setSizePolicy(
+            QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred
+        )
         layout.addWidget(self.status_label)
 
         # Log
@@ -155,6 +160,7 @@ class MainWindow(QMainWindow):
 
         self.log_view = QPlainTextEdit(central)
         self.log_view.setReadOnly(True)
+        self.log_view.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
         layout.addWidget(self.log_view, 2)
 
         self.setCentralWidget(central)
