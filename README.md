@@ -45,6 +45,10 @@ $ uv run yomigana_ebook -f [epub文件...]
 
 > Windows 用户：fugashi 在 Windows 上存在一个已知 bug（[polm/fugashi#42](https://github.com/polm/fugashi/issues/42)），必须在虚拟环境中使用。`uv sync` 会自动创建虚拟环境，无需额外操作。
 
+### Windows GUI 桌面应用
+
+项目还包含一个 Windows GUI 桌面应用（PySide6），支持拖拽/选择多个 EPUB、过滤非日语段落、指定输出目录、实时进度与日志。详情见 [`desktop-app/README.md`](desktop-app/README.md)。
+
 ### 通过 Docker 运行 Web Demo
 
 Web Demo 基于 FastAPI（后端）+ Vite/React（前端）构建，提供网页版的读音标注功能。

@@ -1,5 +1,5 @@
 from warnings import filterwarnings
-from typing import IO
+from typing import IO, Callable, Optional
 from zipfile import ZipFile, ZIP_DEFLATED
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
@@ -14,7 +14,12 @@ filterwarnings("ignore", category=XMLParsedAsHTMLWarning, module="bs4")
 SKIP_TAGS = {"ruby", "rt", "rp", "script", "style"}
 
 
-def process_ebook(reader: IO[bytes], writer: IO[bytes], filter_non_japanese: bool = False):
+def process_ebook(
+    reader: IO[bytes],
+    writer: IO[bytes],
+    filter_non_japanese: bool = False,
+    progress_callback: Optional[Callable[[int, int], None]] = None,
+):
     with ZipFile(reader, "r") as zip_reader, ZipFile(writer, "w", ZIP_DEFLATED) as zip_writer:
         html_files: list[tuple[str, bytes]] = []
 
@@ -27,12 +32,20 @@ def process_ebook(reader: IO[bytes], writer: IO[bytes], filter_non_japanese: boo
                 zip_writer.writestr(file, content)
 
         if not html_files:
+            if progress_callback is not None:
+                progress_callback(0, 0)
             return
+
+        if progress_callback is not None:
+            progress_callback(0, len(html_files))
 
         if len(html_files) == 1:
             file, content = html_files[0]
             processed_file, processed_content = process_html(file, content, filter_non_japanese)
             zip_writer.writestr(processed_file, processed_content)
+
+            if progress_callback is not None:
+                progress_callback(1, 1)
             return
 
         with ProcessPoolExecutor() as executor:
@@ -41,9 +54,14 @@ def process_ebook(reader: IO[bytes], writer: IO[bytes], filter_non_japanese: boo
                 for file, content in html_files
             ]
 
+            completed = 0
             for future in as_completed(futures):
                 file, processed_content = future.result()
                 zip_writer.writestr(file, processed_content)
+                completed += 1
+
+                if progress_callback is not None:
+                    progress_callback(completed, len(html_files))
 
 
 def process_html(file: str, content: bytes, filter_non_japanese: bool = False):

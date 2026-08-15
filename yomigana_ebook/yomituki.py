@@ -1,7 +1,9 @@
 from typing import Tuple, Generator
+from os import environ
 from os.path import commonprefix
 from functools import lru_cache
 
+import unidic
 from fugashi import Tagger  # type: ignore
 from yomigana_ebook.converter import kata2hira
 from yomigana_ebook.checking import (
@@ -14,6 +16,11 @@ from yomigana_ebook.checking import (
     contains_japanese_script,
 )
 
+
+if "YOMIGANA_UNICID_DIR" in environ:
+    # Allow GUI/desktop packaging to point at an external UniDic dictionary
+    # without modifying the installed unidic package.
+    unidic.DICDIR = environ["YOMIGANA_UNICID_DIR"]
 
 tagger = Tagger()  # type: ignore
 

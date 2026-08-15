@@ -1,9 +1,12 @@
+from io import BytesIO
+from zipfile import ZipFile
+
 import pytest
 
 from yomigana_ebook.constants import ALL_HIRA, ALL_KATA
 from yomigana_ebook.yomituki import yomituki, yomituki_word
 from yomigana_ebook.checking import contains_japanese_script
-from yomigana_ebook.process_ebook import process_html
+from yomigana_ebook.process_ebook import process_ebook, process_html
 
 
 @pytest.mark.parametrize(
@@ -145,3 +148,21 @@ def test_process_html_skips_whitespace_only_nodes():
     html = "<html><body><p>  \n \t  </p></body></html>".encode()
     _, result = process_html("test.xhtml", html)
     assert b"<ruby>" not in result
+
+
+def test_process_ebook_reports_progress():
+    reader = BytesIO()
+    with ZipFile(reader, "w") as zip_writer:
+        zip_writer.writestr("page.xhtml", "<html><body><p>漢字</p></body></html>")
+    reader.seek(0)
+
+    writer = BytesIO()
+    progress_calls: list[tuple[int, int]] = []
+    process_ebook(
+        reader,
+        writer,
+        progress_callback=lambda done, total: progress_calls.append((done, total)),
+    )
+
+    assert progress_calls[0] == (0, 1)
+    assert progress_calls[-1] == (1, 1)
