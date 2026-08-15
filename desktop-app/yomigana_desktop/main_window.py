@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from importlib import metadata
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl, Signal
@@ -26,6 +27,15 @@ from PySide6.QtWidgets import (
 )
 
 from yomigana_desktop.worker import ConvertWorker
+
+GITHUB_URL = "https://github.com/FFFold/yomigana-ebook"
+
+
+def _project_version() -> str:
+    try:
+        return metadata.version("yomigana-ebook")
+    except Exception:
+        return "0.2.3"
 
 
 class DropListWidget(QListWidget):
@@ -163,7 +173,25 @@ class MainWindow(QMainWindow):
         self.log_view.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
         layout.addWidget(self.log_view, 2)
 
+        # Footer with project info and GitHub link
+        footer_layout = QHBoxLayout()
+        version = _project_version()
+        self.info_label = QLabel(f"yomigana-ebook v{version}", central)
+        self.github_link = QLabel(
+            f'<a href="{GITHUB_URL}" style="color: #4a90d9;">GitHub</a>',
+            central,
+        )
+        self.github_link.setOpenExternalLinks(True)
+        footer_layout.addWidget(self.info_label)
+        footer_layout.addStretch(1)
+        footer_layout.addWidget(self.github_link)
+        layout.addLayout(footer_layout)
+
         self.setCentralWidget(central)
+
+        help_menu = self.menuBar().addMenu("帮助")
+        about_action = help_menu.addAction("关于 yomigana-ebook")
+        about_action.triggered.connect(self._show_about)
 
     def _add_paths(self, paths: list[str]) -> None:
         existing = {
@@ -204,6 +232,20 @@ class MainWindow(QMainWindow):
             Path(self.file_list.item(i).data(Qt.ItemDataRole.UserRole))
             for i in range(self.file_list.count())
         ]
+
+    def _show_about(self) -> None:
+        version = _project_version()
+        box = QMessageBox(self)
+        box.setWindowTitle("关于 yomigana-ebook")
+        box.setIcon(QMessageBox.Icon.Information)
+        box.setTextFormat(Qt.TextFormat.RichText)
+        box.setText(
+            "<h3>yomigana-ebook</h3>"
+            "<p>为日语 EPUB 添加振假名（furigana）的桌面工具。</p>"
+            f"<p>版本：{version}</p>"
+            f'<p>项目地址：<a href="{GITHUB_URL}">{GITHUB_URL}</a></p>'
+        )
+        box.exec()
 
     def _output_path_for(self, input_path: Path, output_dir: Path | None) -> Path:
         output_name = f"with-yomigana_{input_path.name}"
