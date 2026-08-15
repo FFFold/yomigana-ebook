@@ -6,9 +6,10 @@ Build with (from repo root):
     uv run --project desktop-app pyinstaller desktop-app/yomigana_desktop.spec
 
 The output is a folder (onedir) at desktop-app/dist/yomigana-desktop/.
-UniDic dictionary data is included in the bundle; if you prefer a smaller
-distribution, remove the dicdir entry below and place the dictionary next to
-the executable as unidic/dicdir (or set YOMIGANA_UNICID_DIR).
+By default the UniDic dictionary data is included in the bundle. Set
+YOMIGANA_BUNDLE_UNICID=0 to keep it external; the app then looks for
+unidic/dicdir next to the executable (or in _internal/unidic/dicdir), or uses
+the YOMIGANA_UNICID_DIR environment variable.
 """
 
 import os
@@ -17,20 +18,19 @@ from pathlib import Path
 import unidic
 from PyInstaller.utils.hooks import collect_dynamic_libs
 
+desktop_root = Path(SPECPATH).resolve()
 dicdir = Path(unidic.DICDIR)
 
-# Set YOMIGANA_BUNDLE_UNIDIC=0 to keep the dictionary outside the bundle.
-# The app will then look for unidic/dicdir next to the executable or in
-# _internal/unidic/dicdir (or use YOMIGANA_UNICID_DIR).
-bundle_unidic = os.environ.get("YOMIGANA_BUNDLE_UNIDIC", "1") == "1"
+# Set YOMIGANA_BUNDLE_UNICID=0 to keep the dictionary outside the bundle.
+bundle_unidic = os.environ.get("YOMIGANA_BUNDLE_UNICID", "1") == "1"
 datas = []
 if bundle_unidic:
     datas.append((str(dicdir), os.path.join("unidic", "dicdir")))
 binaries = collect_dynamic_libs("fugashi")
 
 a = Analysis(
-    ["desktop-app/yomigana_desktop/app.py"],
-    pathex=["desktop-app"],
+    [str(desktop_root / "yomigana_desktop" / "app.py")],
+    pathex=[str(desktop_root)],
     binaries=binaries,
     datas=datas,
     hiddenimports=[
@@ -50,6 +50,16 @@ a = Analysis(
     noarchive=False,
     optimize=0,
 )
+
+# PyInstaller tends to include unidic/dicdir automatically because it lives
+# inside the installed unidic package. When the user asks for an external
+# dictionary, strip it from the bundle so the distribution stays small.
+if not bundle_unidic:
+    a.datas = [
+        entry
+        for entry in a.datas
+        if not str(entry[0]).replace("\\", "/").startswith("unidic/dicdir")
+    ]
 
 pyz = PYZ(a.pure)
 
